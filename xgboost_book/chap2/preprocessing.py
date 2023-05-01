@@ -1,4 +1,18 @@
+from typing import Optional
+
 import polars as pl
+from sklearn import base  # type: ignore
+
+
+class KaggleSurveyDataCleaner(base.BaseEstimator, base.TransformerMixin):
+    def __init__(self, ycol: Optional[str] = None):
+        self.ycol = ycol
+
+    def transform(self, X: pl.DataFrame) -> pl.DataFrame:
+        return clean(X)
+
+    def fit(self, X: pl.DataFrame, y=None):
+        return self
 
 
 def clean(df: pl.DataFrame) -> pl.DataFrame:

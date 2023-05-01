@@ -1,20 +1,29 @@
-from typing import Tuple
+from typing import Tuple, Optional
 
-import pandas as pd
 import polars as pl
 from sklearn import model_selection  # type: ignore
 
+from xgboost_book.chap2.converters import (
+    pl_from_pandas_zerocopy,
+)
 
-def train_test_split(
-    raw_df: pl.DataFrame,
-) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
+
+def pl_train_test_split(
+    raw_df: pl.DataFrame, test_size: float, stratify: Optional[bool] = None
+) -> Tuple[pl.DataFrame, pl.DataFrame, pl.Series, pl.Series]:
     X_polars, y_polars = split_X_y(raw_df, "Q6")
     X = X_polars.to_pandas(use_pyarrow_extension_array=True)
     y = y_polars.to_pandas(use_pyarrow_extension_array=True)
+    stratify_col = y if stratify else None
     X_train, X_test, y_train, y_test = model_selection.train_test_split(
-        X, y, test_size=0.3, stratify=y
+        X, y, test_size=test_size, stratify=stratify_col
     )
-    return X_train, X_test, y_train, y_test
+    return (  # type: ignore
+        pl_from_pandas_zerocopy(X_train),
+        pl_from_pandas_zerocopy(X_test),
+        pl_from_pandas_zerocopy(y_train),
+        pl_from_pandas_zerocopy(y_test),
+    )
 
 
 def split_X_y(df: pl.DataFrame, y_col: str) -> Tuple[pl.DataFrame, pl.Series]:
