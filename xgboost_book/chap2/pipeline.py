@@ -1,5 +1,6 @@
 from typing import Optional
 
+import pyarrow as pa
 import pandas as pd
 import polars as pl
 from feature_engine import encoding, imputation  # type: ignore
@@ -13,7 +14,8 @@ class KaggleSurveyDataCleaner(base.BaseEstimator, base.TransformerMixin):
         self.ycol = ycol
 
     def transform(self, X: pd.DataFrame) -> pd.DataFrame:
-        X_polars = pl.from_pandas(X)
+        # Attempt to do this zero copy, from_pandas clones to data as of polars 0.17.10
+        X_polars = pl.from_arrow(pa.Table.from_pandas(X))
         return clean(X_polars).to_pandas(use_pyarrow_extension_array=True)
 
     def fit(self, X: pd.DataFrame, y: pd.Series):
