@@ -8,12 +8,19 @@ packages = [{include = "xgboost_book"}]
 
 [tool.poetry.dependencies]
 python = "^3.9"
-polars = "^0.17.9"
+polars = "^0.17.10"
 requests = "^2.29.0"
+scikit-learn = "^1.2.2"
+feature-engine = "^1.6.0"
+pandas = "^2.0.1"
+pyarrow = "^11.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
+mypy = "^1.2.0"
+types-requests = "^2.29.0.0"
+pandas-stubs = "^2.0.0.230412"
 
 [build-system]
 requires = ["poetry-core"]

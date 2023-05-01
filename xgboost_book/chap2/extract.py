@@ -21,6 +21,7 @@ def extract_zip(url: str, member_name: str) -> pl.DataFrame:
             "Q3",
             "Q4",
             "Q5",
+            "Q6",
             "Q8",
             "Q9",
             "Q16_Part_1",
@@ -31,6 +32,7 @@ def extract_zip(url: str, member_name: str) -> pl.DataFrame:
             "Q2": pl.datatypes.Utf8,
             "Q4": pl.datatypes.Utf8,
             "Q5": pl.datatypes.Utf8,
+            "Q6": pl.datatypes.Utf8,
             "Q8": pl.datatypes.Utf8,
             "Q9": pl.datatypes.Utf8,
             "Q16_Part_1": pl.datatypes.Utf8,
@@ -42,12 +44,12 @@ def extract_zip(url: str, member_name: str) -> pl.DataFrame:
 
 
 def extract_and_cache(url: str, dst: str, member_name: str) -> pl.DataFrame:
-    dst = Path(dst)
-    if dst.exists():
-        df = pl.read_parquet(dst)
+    dst_path = Path(dst)
+    if dst_path.exists():
+        df = pl.read_parquet(dst_path)
     else:
         df = extract_zip(url, member_name)
-        df.write_parquet(dst)
+        df.write_parquet(dst_path)
     return df
 
 
