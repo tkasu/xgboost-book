@@ -14,7 +14,7 @@ This repository contains examples from [Effective XGBoost book](https://store.me
 
 ### Run pipelines locally
 
-`poetry run python -m xgboost_book.chap2`
+`poetry run python -m xgboost_book.survey_model`
 
 ### Tests
 

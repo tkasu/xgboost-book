@@ -1,11 +1,11 @@
 from feature_engine import encoding, imputation  # type: ignore
 from sklearn import pipeline  # type: ignore
 
-from xgboost_book.chap2.converters import (
+from xgboost_book.survey_model.converters import (
     PandasToPolarsConverter,
     PolarsToPandasConverter,
 )
-from xgboost_book.chap2.preprocessing import KaggleSurveyDataCleaner
+from xgboost_book.survey_model.preprocessing import KaggleSurveyDataCleaner
 
 survey_pipeline = pipeline.Pipeline(
     [

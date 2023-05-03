@@ -1,6 +1,6 @@
-from xgboost_book.chap2.extract import extract_and_cache
-from xgboost_book.chap2.pipeline import survey_pipeline
-from xgboost_book.chap2.train_test_data import pl_train_test_split
+from xgboost_book.survey_model.extract import extract_and_cache
+from xgboost_book.survey_model.pipeline import survey_pipeline
+from xgboost_book.survey_model.train_test_data import pl_train_test_split
 
 
 URL = "https://github.com/mattharrison/datasets/raw/master/data/kaggle-survey-2018.zip"

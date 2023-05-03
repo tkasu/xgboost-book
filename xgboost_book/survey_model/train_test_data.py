@@ -3,7 +3,7 @@ from typing import Tuple, Optional
 import polars as pl
 from sklearn import model_selection  # type: ignore
 
-from xgboost_book.chap2.converters import (
+from xgboost_book.survey_model.converters import (
     pl_from_pandas_zerocopy,
 )
 
