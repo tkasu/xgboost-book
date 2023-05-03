@@ -23,5 +23,6 @@ survey_pipeline = pipeline.Pipeline(
                 imputation_method="median", variables=["education", "years_exp"]
             ),
         ),
+        ("to_polars", PandasToPolarsConverter()),
     ]
 )

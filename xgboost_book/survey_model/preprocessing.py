@@ -1,7 +1,7 @@
-from typing import Optional
+from typing import Optional, Tuple
 
 import polars as pl
-from sklearn import base  # type: ignore
+from sklearn import base, preprocessing  # type: ignore
 
 
 class KaggleSurveyDataCleaner(base.BaseEstimator, base.TransformerMixin):
@@ -13,6 +13,15 @@ class KaggleSurveyDataCleaner(base.BaseEstimator, base.TransformerMixin):
 
     def fit(self, X: pl.DataFrame, y=None):
         return self
+
+
+def clean_y(
+    y_train: pl.Series, y_test: pl.Series
+) -> Tuple[pl.Series, pl.Series, preprocessing.LabelEncoder]:
+    encoder = preprocessing.LabelEncoder()
+    y_train_cleaned = encoder.fit_transform(y_train)
+    y_test_cleaned = encoder.transform(y_test)
+    return y_train_cleaned, y_test_cleaned, encoder
 
 
 def clean(df: pl.DataFrame) -> pl.DataFrame:
