@@ -1,5 +1,6 @@
 from typing import Optional, Union
 
+import numpy as np
 import pandas as pd
 import polars as pl
 import pyarrow as pa  # type: ignore
@@ -14,12 +15,14 @@ def pl_from_pandas_zerocopy(
     pl.from_pandas clones to data as of polars 0.17.10
     """
     match df:
+        case np.ndarray():
+            return pl.from_arrow(pa.array(df))
         case pd.Series():
             return pl.from_arrow(pa.Array.from_pandas(df))
         case pd.DataFrame():
             return pl.from_arrow(pa.Table.from_pandas(df))
-        case _:
-            raise ValueError("Expected Dataframe or series")
+        case t:
+            raise ValueError(f"Expected Dataframe or series, got {type(t)}")
 
 
 class PandasToPolarsConverter(base.BaseEstimator, base.TransformerMixin):

@@ -20,7 +20,7 @@ This repository contains examples from [Effective XGBoost book](https://store.me
 
 `poetry run black . && mypy .`
 
-### Run pipelines locally
+### Run training locally
 
 ```
 $ poetry run python -m xgboost_book.survey_model --help
@@ -42,6 +42,10 @@ Options:
 #### XGBoost example:
 
 `poetry run python -m xgboost_book.survey_model --model xgboost --hypopt_evals 2000`
+
+### Run XGBoost training in Amazon Sagemaker
+
+`poetry run python -m xgboost_book.survey_model.sagemaker --sagemaker-role arn:aws:iam::123456789:role/sagemaker-exec-role`
 
 ### Tests
 

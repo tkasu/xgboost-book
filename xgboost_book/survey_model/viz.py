@@ -1,5 +1,6 @@
-from typing import Union, Type, List
+from typing import Union, List
 
+import numpy as np
 import dtreeviz  # type: ignore
 import polars as pl
 from sklearn.tree import DecisionTreeClassifier  # type: ignore
@@ -10,7 +11,7 @@ def get_visualisation_model(
     model: Union[XGBClassifier, DecisionTreeClassifier],
     class_names: List[str],
     X_train: pl.DataFrame,
-    y_train: pl.Series,
+    y_train: np.ndarray,
 ):
     return dtreeviz.model(
         model,

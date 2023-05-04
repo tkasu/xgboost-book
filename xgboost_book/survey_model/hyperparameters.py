@@ -1,6 +1,7 @@
 from typing import Any, Union, Optional, Mapping, Type
 
 import hyperopt  # type: ignore
+import numpy as np
 import polars as pl
 from sklearn.metrics import accuracy_score  # type: ignore
 from sklearn.tree import DecisionTreeClassifier  # type: ignore
@@ -15,9 +16,9 @@ def get_best_params(
     options: Mapping[str, Any],
     hypopt_evals: int,
     X_train: pl.DataFrame,
-    y_train: pl.Series,
+    y_train: np.ndarray,
     X_test: pl.DataFrame,
-    y_test: pl.Series,
+    y_test: np.ndarray,
 ) -> HypOptSpaceType:
     trials = hyperopt.Trials()
 
@@ -57,9 +58,9 @@ def hyperparameter_tuning(
     model_type,
     space: HypOptSpaceType,
     X_train: pl.DataFrame,
-    y_train: pl.Series,
+    y_train: np.ndarray,
     X_test: pl.DataFrame,
-    y_test: pl.Series,
+    y_test: np.ndarray,
 ) -> HypOptSpaceType:
     space = clean_hypopt_space(space)
     model = model_type(**space)
