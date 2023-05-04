@@ -1,11 +1,41 @@
-from typing import Any, Union, Optional, Mapping
+from typing import Any, Union, Optional, Mapping, Type
 
 import hyperopt  # type: ignore
 import polars as pl
 from sklearn.metrics import accuracy_score  # type: ignore
+from sklearn.tree import DecisionTreeClassifier  # type: ignore
+from xgboost import XGBClassifier  # type: ignore
 
 
 HypOptSpaceType = Mapping[str, Optional[Union[str, int]]]
+
+
+def get_best_params(
+    model_type: Union[Type[XGBClassifier], Type[DecisionTreeClassifier]],
+    options: Mapping[str, Any],
+    hypopt_evals: int,
+    X_train: pl.DataFrame,
+    y_train: pl.Series,
+    X_test: pl.DataFrame,
+    y_test: pl.Series,
+) -> HypOptSpaceType:
+    trials = hyperopt.Trials()
+
+    best_space = hyperopt.fmin(
+        fn=lambda space: hyperparameter_tuning(
+            model_type,
+            space,
+            X_train,
+            y_train,
+            X_test,
+            y_test,
+        ),
+        space=options,
+        algo=hyperopt.tpe.suggest,
+        max_evals=hypopt_evals,
+        trials=trials,
+    )
+    return clean_hypopt_output(options, best_space)
 
 
 def clean_hypopt_space(space: HypOptSpaceType) -> HypOptSpaceType:

@@ -1,11 +1,7 @@
 import click
-import hyperopt  # type: ignore
 
 from xgboost_book.survey_model.extract import extract_and_cache
-from xgboost_book.survey_model.hyperparameters import (
-    hyperparameter_tuning,
-    clean_hypopt_output,
-)
+from xgboost_book.survey_model.hyperparameters import get_best_params
 from xgboost_book.survey_model.models import get_model_and_options
 from xgboost_book.survey_model.pipeline import survey_pipeline
 from xgboost_book.survey_model.preprocessing import clean_y
@@ -32,24 +28,18 @@ def main(model: str, hypopt_evals: int):
     y_train_cleaned, y_test_cleaned, encoder = clean_y(y_train, y_test)
 
     model_type, options = get_model_and_options(model)
-    trials = hyperopt.Trials()
 
-    best_space = hyperopt.fmin(
-        fn=lambda space: hyperparameter_tuning(
-            model_type,
-            space,
-            X_train_cleaned,
-            y_train_cleaned,
-            X_test_cleaned,
-            y_test_cleaned,
-        ),
-        space=options,
-        algo=hyperopt.tpe.suggest,
-        max_evals=hypopt_evals,
-        trials=trials,
+    best_params = get_best_params(
+        model_type=model_type,
+        options=options,
+        hypopt_evals=hypopt_evals,
+        X_train=X_train_cleaned,
+        y_train=y_train_cleaned,
+        X_test=X_test_cleaned,
+        y_test=y_test_cleaned,
     )
-    best_params = clean_hypopt_output(options, best_space)
     print(best_params)
+
     model = model_type(**best_params)
     model.fit(X_train_cleaned, y_train_cleaned)
 
