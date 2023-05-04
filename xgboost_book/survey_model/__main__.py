@@ -17,9 +17,10 @@ URL = "https://github.com/mattharrison/datasets/raw/master/data/kaggle-survey-20
 CACHE_PATH = "cache/kaggle_survey.parquet"
 MEMBER_NAME = "multipleChoiceResponses.csv"
 
+
 @click.command()
-@click.option('--model', type=click.Choice(["decision_tree", "xgboost"]), required=True)
-@click.option('--hypopt_evals', type=int, default=100)
+@click.option("--model", type=click.Choice(["decision_tree", "xgboost"]), required=True)
+@click.option("--hypopt_evals", type=int, default=100)
 def main(model: str, hypopt_evals: int):
     df = extract_and_cache(URL, CACHE_PATH, MEMBER_NAME)
     X_train, X_test, y_train, y_test = pl_train_test_split(
