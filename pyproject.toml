@@ -18,6 +18,7 @@ xgboost = "^1.7.5"
 cffi = "^1.15.1"
 dtreeviz = "^2.2.1"
 graphviz = "^0.20.1"
+hyperopt = "^0.2.7"
 
 
 [tool.poetry.group.dev.dependencies]
