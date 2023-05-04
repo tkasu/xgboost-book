@@ -22,7 +22,26 @@ This repository contains examples from [Effective XGBoost book](https://store.me
 
 ### Run pipelines locally
 
-`poetry run python -m xgboost_book.survey_model`
+```
+$ poetry run python -m xgboost_book.survey_model --help
+
+Usage: python -m xgboost_book.survey_model [OPTIONS]
+
+Options:
+  --model [decision_tree|xgboost]
+                                  [required]
+  --hypopt_evals INTEGER
+  --help                          Show this message and exit.
+
+```
+
+#### Decision tree example:
+
+`poetry run python -m xgboost_book.survey_model --model decision_tree --hypopt_evals 200`
+
+#### XGBoost example:
+
+`poetry run python -m xgboost_book.survey_model --model xgboost --hypopt_evals 2000`
 
 ### Tests
 

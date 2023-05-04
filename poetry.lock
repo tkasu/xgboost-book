@@ -226,7 +226,7 @@ files = [
 name = "click"
 version = "8.1.3"
 description = "Composable command line interface toolkit"
-category = "dev"
+category = "main"
 optional = false
 python-versions = ">=3.7"
 files = [
@@ -1482,4 +1482,4 @@ scikit-learn = ["scikit-learn"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "cab2f631357b3e1821646832031e3d996aba32e5988cd5e9a5b1d0608e84460c"
+content-hash = "cac2faabb44882e5f8b91bd794f0a01f4f8dc39a2ef6790424418bb599edf042"

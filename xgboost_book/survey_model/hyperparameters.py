@@ -1,31 +1,36 @@
-from typing import Dict, Any, Union, Optional
+from typing import Any, Union, Optional, Mapping
 
-import hyperopt
+import hyperopt  # type: ignore
 import polars as pl
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score  # type: ignore
 
 
-def clean_hypopt_space(
-    space: Dict[str, Optional[Union[str, int]]]
-) -> Dict[str, Optional[Union[str, int]]]:
+HypOptSpaceType = Mapping[str, Optional[Union[str, int]]]
+
+
+def clean_hypopt_space(space: HypOptSpaceType) -> HypOptSpaceType:
     int_vals = ["max_depth", "reg_alpha", "min_samples_leaf", "min_samples_split"]
-    return {k: (int(val) if k in int_vals else val) for k, val in space.items()}
+
+    return {
+        k: (int(val) if k in int_vals else val)  # type: ignore
+        for k, val in space.items()
+    }
 
 
 def clean_hypopt_output(
-    options: Dict[str, Any], space: Dict[str, Optional[Union[str, int]]]
-) -> Dict[str, Optional[Union[str, int]]]:
+    options: Mapping[str, Any], space: HypOptSpaceType
+) -> HypOptSpaceType:
     return clean_hypopt_space(hyperopt.space_eval(options, space))
 
 
 def hyperparameter_tuning(
     model_type,
-    space: Dict[str, Union[str, int]],
+    space: HypOptSpaceType,
     X_train: pl.DataFrame,
     y_train: pl.Series,
     X_test: pl.DataFrame,
     y_test: pl.Series,
-) -> Dict[str, Any]:
+) -> HypOptSpaceType:
     space = clean_hypopt_space(space)
     model = model_type(**space)
     model.fit(X_train, y_train)
