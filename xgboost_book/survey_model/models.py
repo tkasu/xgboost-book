@@ -1,16 +1,13 @@
 from typing import Any, Dict, Tuple, Type, Union
 
-import sklearn  # type: ignore
-import xgboost as xgb  # type: ignore
 from hyperopt import hp  # type: ignore
+from sklearn.tree import DecisionTreeClassifier  # type: ignore
+from xgboost import XGBClassifier  # type: ignore
 
 
 def get_model_and_options(
     model_name: str,
-) -> Tuple[
-    Union[Type[xgb.XGBClassifier], Type[sklearn.tree.DecisionTreeClassifier]],
-    Dict[str, Any],
-]:
+) -> Tuple[Union[Type[XGBClassifier], Type[DecisionTreeClassifier]], Dict[str, Any],]:
     match model_name:
         case "decision_tree":
             return decision_tree()
@@ -20,9 +17,9 @@ def get_model_and_options(
             raise ValueError(f"Invalid model name: {model_name}")
 
 
-def xgboost() -> Tuple[Type[xgb.XGBClassifier], Dict[str, Any]]:
+def xgboost() -> Tuple[Type[XGBClassifier], Dict[str, Any]]:
     return (
-        xgb.XGBClassifier,
+        XGBClassifier,
         {
             "max_depth": hp.quniform("max_depth", 1, 8, 1),
             "min_child_weight": hp.loguniform("min_child_weight", -2, 3),
@@ -36,9 +33,9 @@ def xgboost() -> Tuple[Type[xgb.XGBClassifier], Dict[str, Any]]:
     )
 
 
-def decision_tree() -> Tuple[Type[sklearn.tree.DecisionTreeClassifier], Dict[str, Any]]:
+def decision_tree() -> Tuple[Type[DecisionTreeClassifier], Dict[str, Any]]:
     return (
-        sklearn.tree.DecisionTreeClassifier,
+        DecisionTreeClassifier,
         {
             "max_depth": hp.quniform("max_depth", 1, 8, 1),
             "min_samples_split": hp.quniform("min_samples_split", 2, 40, 1),

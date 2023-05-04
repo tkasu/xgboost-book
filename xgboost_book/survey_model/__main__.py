@@ -1,5 +1,4 @@
 import click
-import dtreeviz  # type: ignore
 import hyperopt  # type: ignore
 
 from xgboost_book.survey_model.extract import extract_and_cache
@@ -11,7 +10,7 @@ from xgboost_book.survey_model.models import get_model_and_options
 from xgboost_book.survey_model.pipeline import survey_pipeline
 from xgboost_book.survey_model.preprocessing import clean_y
 from xgboost_book.survey_model.train_test_data import pl_train_test_split
-
+from xgboost_book.survey_model.viz import get_visualisation_model
 
 URL = "https://github.com/mattharrison/datasets/raw/master/data/kaggle-survey-2018.zip"
 CACHE_PATH = "cache/kaggle_survey.parquet"
@@ -57,14 +56,11 @@ def main(model: str, hypopt_evals: int):
     print(model.get_params())
     print(f"Model score: {model.score(X_test_cleaned, y_test_cleaned)}")
 
-    viz_model = dtreeviz.model(
-        model,
-        tree_index=0,
-        X_train=X_train_cleaned.to_pandas(use_pyarrow_extension_array=True),
-        y_train=y_train_cleaned,
-        feature_names=X_train_cleaned.columns,
-        target_name="Data Scientist",
+    viz_model = get_visualisation_model(
+        model=model,
         class_names=encoder.classes_,
+        X_train=X_train_cleaned,
+        y_train=y_train_cleaned,
     )
     viz_model.view().show()
     print(viz_model.node_stats(node_id=0))
