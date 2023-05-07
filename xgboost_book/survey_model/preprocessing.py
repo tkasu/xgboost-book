@@ -16,6 +16,18 @@ class KaggleSurveyDataCleaner(base.BaseEstimator, base.TransformerMixin):
         return self
 
 
+class PolarsColOrderer(base.BaseEstimator, base.TransformerMixin):
+    def __init__(self, ycol: Optional[str] = None):
+        self.ycol = ycol
+
+    def transform(self, X: pl.DataFrame) -> pl.DataFrame:
+        cols_sorted = sorted(X.columns)
+        return X.select(*cols_sorted)
+
+    def fit(self, X: pl.DataFrame, y=None):
+        return self
+
+
 def clean_y(
     y_train: pl.Series, y_test: pl.Series
 ) -> Tuple[np.ndarray, np.ndarray, preprocessing.LabelEncoder]:

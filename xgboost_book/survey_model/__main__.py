@@ -1,4 +1,5 @@
 import click
+import xgboost as xgb
 
 from xgboost_book.survey_model.extract import extract_and_cache
 from xgboost_book.survey_model.hyperparameters import get_best_params
@@ -9,7 +10,8 @@ from xgboost_book.survey_model.train_test_data import pl_train_test_split
 from xgboost_book.survey_model.viz import get_visualisation_model
 
 URL = "https://github.com/mattharrison/datasets/raw/master/data/kaggle-survey-2018.zip"
-CACHE_PATH = "cache/kaggle_survey.parquet"
+CACHE_DIR = "cache"
+CACHE_PATH = f"{CACHE_DIR}/kaggle_survey.parquet"
 MEMBER_NAME = "multipleChoiceResponses.csv"
 
 
@@ -43,6 +45,10 @@ def main(model: str, hypopt_evals: int):
     model = model_type(**best_params)
     model.fit(X_train_cleaned, y_train_cleaned)
 
+    if isinstance(model, xgb.XGBClassifier):
+        model.save_model(f"{CACHE_DIR}/xgboost-model")
+
+    print(f"Training X cols: {X_train_cleaned.columns}")
     print(model.get_params())
     print(f"Model score: {model.score(X_test_cleaned, y_test_cleaned)}")
 

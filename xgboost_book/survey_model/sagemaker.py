@@ -1,10 +1,14 @@
+from time import gmtime, strftime
+
 import boto3  # type: ignore
 import click
 import numpy as np
 import polars as pl
 import sagemaker  # type: ignore
-import time
-from time import gmtime, strftime
+from sagemaker import TrainingInput
+from sagemaker.estimator import Estimator
+from sagemaker.workflow.pipeline import Pipeline
+from sagemaker.workflow.steps import TrainingStep
 
 from xgboost_book.survey_model.converters import pl_from_pandas_zerocopy
 from xgboost_book.survey_model.extract import extract_and_cache
@@ -31,8 +35,8 @@ def main(sagemaker_role: str):
     """
     Run XGBoost training in Amazon Sagemaker.
 
-    This is mostly just copy-paste from:
-    https://github.com/aws/amazon-sagemaker-examples/blob/main/introduction_to_amazon_algorithms/xgboost_abalone/xgboost_parquet_input_training.ipynb
+    This is mostly done based on example:
+    https://sagemaker-examples.readthedocs.io/en/latest/sagemaker-pipelines/tabular/abalone_build_train_deploy/sagemaker-pipelines-preprocess-train-evaluate-batch-transform_outputs.html
     """
     region = boto3.Session().region_name
     bucket = sagemaker.Session().default_bucket()
@@ -63,91 +67,65 @@ def main(sagemaker_role: str):
         validation_data_path, bucket=bucket, key_prefix=f"{prefix}/validation"
     )
 
+    model_output_path = f"s3://{bucket}/{prefix}/xgboost-pipeline"
+    training_job_name = "xgboost-survey-data-" + strftime("%Y-%m-%d-%H-%M-%S", gmtime())
+
     container = sagemaker.image_uris.retrieve("xgboost", region, "1.7-1")
-
-    client = boto3.client("sagemaker", region_name=region)
-
-    training_job_name = "xgboost-survey-data-" + strftime(
-        "%Y-%m-%d-%H-%M-%S", gmtime()
+    xgb_training = Estimator(
+        image_uri=container,
+        role=sagemaker_role,
+        instance_type="ml.m5.large",
+        instance_count=1,
+        output_path=model_output_path,
+        base_job_name=training_job_name,
+        region=region,
+        volume_size=1,
+        max_run=7200,
+        max_wait=7200,
+        use_spot_instances=True,
     )
-    print("Training job", training_job_name)
 
-    create_training_params = {
-        "AlgorithmSpecification": {
-            "TrainingImage": container,
-            "TrainingInputMode": "Pipe",
-        },
-        "RoleArn": sagemaker_role,
-        "OutputDataConfig": {"S3OutputPath": f"s3://{bucket}/{prefix}/single-xgboost"},
-        "EnableManagedSpotTraining": True,
-        "ResourceConfig": {
-            "InstanceCount": 1,
-            "InstanceType": "ml.m5.large",
-            "VolumeSizeInGB": 1,
-        },
-        "TrainingJobName": training_job_name,
-        "HyperParameters": {
-            # From local hypopt run
-            "colsample_bytree": "0.812",
-            "gamma": "0.00038",
-            "learning_rate": " 0.39",
-            "max_depth": "8",
-            "min_child_weight": "1.46",
-            "reg_alpha": "9",
-            "reg_lambda": "1.93",
-            "subsample": "0.53",
-            "objective": "binary:logistic",
-            # Sagemaker params
-            "num_round": "10",
-            "verbosity": "2",
-        },
-        "StoppingCondition": {
-            "MaxWaitTimeInSeconds": 7200,
-            "MaxRuntimeInSeconds": 7200,
-        },
-        "InputDataConfig": [
-            {
-                "ChannelName": "train",
-                "DataSource": {
-                    "S3DataSource": {
-                        "S3DataType": "S3Prefix",
-                        "S3Uri": f"s3://{bucket}/{prefix}/training",
-                        "S3DataDistributionType": "FullyReplicated",
-                    }
-                },
-                "ContentType": "application/x-parquet",
-                "CompressionType": "None",
-            },
-            {
-                "ChannelName": "validation",
-                "DataSource": {
-                    "S3DataSource": {
-                        "S3DataType": "S3Prefix",
-                        "S3Uri": f"s3://{bucket}/{prefix}/validation",
-                        "S3DataDistributionType": "FullyReplicated",
-                    }
-                },
-                "ContentType": "application/x-parquet",
-                "CompressionType": "None",
-            },
-        ],
+    hyperparams = {
+        # From local hypopt run
+        "colsample_bytree": "0.812",
+        "gamma": "0.00038",
+        "learning_rate": " 0.39",
+        "max_depth": "8",
+        "min_child_weight": "1.46",
+        "reg_alpha": "9",
+        "reg_lambda": "1.93",
+        "subsample": "0.53",
+        "objective": "binary:logistic",
+        # Sagemaker params
+        "num_round": "10",
+        "verbosity": "2",
     }
+    xgb_training.set_hyperparameters(**hyperparams)
 
-    print(
-        f"Creating a training job with name: {training_job_name}. It will take between 5 and 6 minutes to complete."
+    train_args = xgb_training.fit(
+        inputs={
+            "train": TrainingInput(
+                s3_data=f"s3://{bucket}/{prefix}/training",
+                content_type="application/x-parquet",
+            ),
+            "validation": TrainingInput(
+                s3_data=f"s3://{bucket}/{prefix}/validation",
+                content_type="application/x-parquet",
+            ),
+        }
     )
-    client.create_training_job(**create_training_params)
 
-    status = client.describe_training_job(TrainingJobName=training_job_name)[
-        "TrainingJobStatus"
-    ]
-    print(status)
-    while status != "Completed" and status != "Failed":
-        time.sleep(10)
-        status = client.describe_training_job(TrainingJobName=training_job_name)[
-            "TrainingJobStatus"
-        ]
-        print(status)
+    xgb_train_step = TrainingStep(
+        name="SurveyTraining",
+        step_args=train_args,
+    )
+
+    pipeline_name = "SurveyPipeline"
+    pipeline = Pipeline(name=pipeline_name, steps=[xgb_train_step])
+
+    execution = pipeline.start()
+    execution.list_steps()
+    execution.wait()
 
 
 if __name__ == "__main__":

@@ -1,4 +1,8 @@
 cache/*.parquet
+cache/*.tar.gz
+cache/*.json
+cache/xgboost-model
+xgboost-model
 .history
 .idea/
 **/__pycache__/

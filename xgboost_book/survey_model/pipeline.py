@@ -5,7 +5,10 @@ from xgboost_book.survey_model.converters import (
     PandasToPolarsConverter,
     PolarsToPandasConverter,
 )
-from xgboost_book.survey_model.preprocessing import KaggleSurveyDataCleaner
+from xgboost_book.survey_model.preprocessing import (
+    KaggleSurveyDataCleaner,
+    PolarsColOrderer,
+)
 
 survey_pipeline = pipeline.Pipeline(
     [
@@ -13,9 +16,7 @@ survey_pipeline = pipeline.Pipeline(
         ("to_pandas", PolarsToPandasConverter()),
         (
             "categorise",
-            encoding.OneHotEncoder(
-                top_categories=5, drop_last=True, variables=["Q1", "Q3", "major"]
-            ),
+            encoding.OneHotEncoder(variables=["Q1", "Q3", "major"]),
         ),
         (
             "num_impute",
@@ -24,5 +25,6 @@ survey_pipeline = pipeline.Pipeline(
             ),
         ),
         ("to_polars", PandasToPolarsConverter()),
+        ("order_cols", PolarsColOrderer()),
     ]
 )
