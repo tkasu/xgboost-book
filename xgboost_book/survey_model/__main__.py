@@ -6,6 +6,7 @@ from xgboost_book.survey_model.hyperparameters import get_best_params
 from xgboost_book.survey_model.models import get_model_and_options
 from xgboost_book.survey_model.pipeline import survey_pipeline
 from xgboost_book.survey_model.preprocessing import clean_y
+from xgboost_book.survey_model.sagemaker import combine_data_for_sagemaker
 from xgboost_book.survey_model.train_test_data import pl_train_test_split
 from xgboost_book.survey_model.viz import get_visualisation_model
 
@@ -28,6 +29,13 @@ def main(model: str, hypopt_evals: int):
     X_test_cleaned = survey_pipeline.fit_transform(X_test, y_test)
 
     y_train_cleaned, y_test_cleaned, encoder = clean_y(y_train, y_test)
+
+    training_data_path = f"{CACHE_DIR}/training.parquet"
+    validation_data_path = f"{CACHE_DIR}/validation.parquet"
+    training_data = combine_data_for_sagemaker(X_train_cleaned, y_train_cleaned)
+    validation_data = combine_data_for_sagemaker(X_test_cleaned, y_test_cleaned)
+    training_data.write_parquet(training_data_path)
+    validation_data.write_parquet(validation_data_path)
 
     model_type, options = get_model_and_options(model)
 

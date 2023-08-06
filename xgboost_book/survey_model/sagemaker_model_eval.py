@@ -13,12 +13,14 @@ import xgboost as xgb
 @click.option("--test-data-path", default="/opt/ml/processing/test")
 @click.option("--output-dir", default="/opt/ml/processing/evaluation")
 def eval_model(model_path: str, test_data_path: str, output_dir: str):
-    with tarfile.open(model_path) as tar:
-        tar.extractall(path=".")
+    if tarfile.is_tarfile(model_path):
+        folder = pathlib.Path(model_path).parent
+        with tarfile.open(model_path) as tar:
+            tar.extractall(path=folder)
+        model_path = folder.joinpath("xgboost-model")
 
     model = xgb.XGBClassifier()
-    model.load_model("xgboost-model")
-    # model.load_model("cache/xgboost-model")
+    model.load_model(model_path)
 
     df = pl.read_parquet(test_data_path)
     X_test = df.drop("role")

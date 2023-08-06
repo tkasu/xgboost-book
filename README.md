@@ -3,8 +3,7 @@
 This repository contains examples from [Effective XGBoost book](https://store.metasnake.com/xgboost) with the following flavours:
 
 - Uses polars instead of pandas
-- TODO use Sagemaker
-- TODO AWS CDK deployment
+- Adds optional Sagemaker training
 
 ## Development
 
@@ -41,7 +40,19 @@ Options:
 
 #### XGBoost example:
 
+Model training:
+
 `poetry run python -m xgboost_book.survey_model --model xgboost --hypopt_evals 2000`
+
+Model evaluation:
+
+```
+poetry run python -m xgboost_book.survey_model.sagemaker_model_eval \
+    --model-path cache/xgboost-model \
+    --test-data-path cache/validation.parquet \
+    --output-dir cache/ \
+    && cat cache/evaluation.json
+```
 
 ### Run XGBoost training in Amazon Sagemaker
 
